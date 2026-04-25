@@ -1,231 +1,282 @@
-<!DOCTYPE html><html lang="ro">
+<!DOCTYPE html>
+<html lang="ro">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Grade Tracker Pro++</title>  <style>
-    * { box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grade Tracker ULTRA</title>
 
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background: #121212;
-      color: white;
-    }
+<style>
+* { box-sizing: border-box; }
 
-    .container {
-      max-width: 650px;
-      margin: auto;
-    }
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: Arial;
+  background: #121212;
+  color: white;
+}
 
-    h2 { text-align: center; }
+.container {
+  max-width: 650px;
+  margin: auto;
+}
 
-    input, select {
-      width: 100%;
-      padding: 14px;
-      margin: 8px 0;
-      border-radius: 10px;
-      border: 1px solid #333;
-      background: #1e1e1e;
-      color: white;
-      font-size: 16px;
-    }
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: #1e1e1e;
+  color: white;
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 10px;
-      background: #4caf50;
-      color: white;
-      font-size: 16px;
-      margin-top: 10px;
-    }
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border: none;
+  border-radius: 10px;
+  background: #4caf50;
+  color: white;
+}
 
-    .card {
-      background: #1e1e1e;
-      padding: 12px;
-      margin-top: 12px;
-      border-radius: 10px;
-    }
+.card {
+  background: #1e1e1e;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 10px;
+}
 
-    .row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.row {
+  display: flex;
+  justify-content: space-between;
+}
 
-    .grade {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 6px;
-      background: #2a2a2a;
-      padding: 6px;
-      border-radius: 8px;
-    }
+.grade {
+  display: flex;
+  justify-content: space-between;
+  background: #2a2a2a;
+  margin-top: 5px;
+  padding: 6px;
+  border-radius: 6px;
+}
 
-    .del {
-      background: red;
-      border: none;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 6px;
-    }
+.del { background:red; border:none; color:white; padding:4px 8px; }
+.delSub { background:#ff8800; }
 
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #333;
-      padding: 12px 18px;
-      border-radius: 10px;
-      opacity: 0;
-      transition: 0.3s;
-    }
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  padding: 10px 16px;
+  border-radius: 10px;
+  opacity: 0;
+}
 
-    .toast.show { opacity: 1; }
+.toast.show { opacity: 1; }
 
-    .overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
+.overlay {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:#000;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-    .box {
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-    }
-  </style></head>
-<body><!-- LOGIN --><div class="overlay" id="login">
+.box {
+  background:#1e1e1e;
+  padding:20px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="overlay" id="login">
   <div class="box">
     <h3>PIN</h3>
-    <input id="pinInput" type="password" placeholder="Introdu PIN" />
+    <input id="pinInput" type="password">
     <button onclick="checkPin()">Intră</button>
-    <button onclick="setPin()" style="background:#2196f3">Setează PIN</button>
+    <button onclick="setPin()" style="background:#2196f3">Set PIN</button>
   </div>
-</div><div class="container">
-  <h2>📚 Grade Tracker PRO++</h2>  <input id="subject" placeholder="Materie" />
-  <button onclick="addSubject()">Adaugă materie</button><select id="subjectSelect"></select> <input id="grade" type="number" placeholder="Notă" /> <button onclick="openModal()">Adaugă notă</button>
+</div>
 
-<button onclick="exportData()" style="background:#2196f3">Export</button> <input type="file" onchange="importData(event)" />
+<div class="container">
+<h2>📚 Grade Tracker ULTRA</h2>
 
-  <div id="stats"></div>
-  <div id="list"></div>
-</div><!-- MODAL --><div class="toast" id="toast"></div><script>
-let data = JSON.parse(localStorage.getItem("data") || "{}");
-let pin = localStorage.getItem("pin");
-let pending = null;
+<select id="classSelect">
+<option value="">Alege clasa</option>
+<option>6</option>
+<option>7</option>
+<option>8</option>
+<option>9</option>
+<option>10</option>
+<option>11</option>
+<option>12</option>
+</select>
+
+<button onclick="loadTemplate()">Importă materii</button>
+
+<input id="subject" placeholder="Materie nouă">
+<button onclick="addSubject()">Adaugă materie</button>
+
+<select id="subjectSelect"></select>
+<input id="grade" type="number" placeholder="Notă">
+<button onclick="addGrade()">Adaugă notă</button>
+
+<div id="stats"></div>
+<div id="list"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("data")||"{}");
+let pin = localStorage.getItem("pin")||"";
+
+const templates = {
+6:[
+"Biologia","Educație plastică","Educație tehnologică","Fizica","Geografia",
+"Istoria românilor și universală","Limba engleză","Limba franceză",
+"Limba și literatura română","Matematică","Educația fizică","Educație pentru societate"
+],
+7:[
+"Biologia","Educație plastică","Educație tehnologică","Fizica","Geografia",
+"Istoria românilor și universală","Limba engleză","Limba franceză",
+"Limba și literatura română","Matematică","Educația fizică","Educație pentru societate",
+"Informatica","Chimia"
+]
+};
+
+function getTemplate(cls){
+if(cls>=7) return templates[7];
+return templates[6];
+}
 
 function showToast(msg){
-  const t=document.getElementById("toast");
-  t.innerText=msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),1500);
+const t=document.getElementById("toast");
+t.innerText=msg;
+t.classList.add("show");
+setTimeout(()=>t.classList.remove("show"),1500);
 }
 
 function setPin(){
-  const p=document.getElementById("pinInput").value;
-  if(!p) return showToast("PIN invalid");
-  localStorage.setItem("pin",p);
-  showToast("PIN setat");
+const p=document.getElementById("pinInput").value;
+if(!p) return showToast("PIN invalid");
+localStorage.setItem("pin",p);
+pin=p;
+showToast("PIN setat");
 }
 
 function checkPin(){
-  const p=document.getElementById("pinInput").value;
-  if(p===pin){
-    document.getElementById("login").style.display="none";
-    showToast("Bine ai venit");
-  } else showToast("PIN greșit");
+const p=document.getElementById("pinInput").value;
+if(!pin) return showToast("Setează PIN");
+if(p===pin){
+document.getElementById("login").style.display="none";
+}else showToast("PIN greșit");
 }
 
-function save(){ localStorage.setItem("data",JSON.stringify(data)); }
+function save(){
+localStorage.setItem("data",JSON.stringify(data));
+}
 
 function addSubject(){
-  const s=document.getElementById("subject").value.trim();
-  if(!s) return showToast("Scrie materie");
-  if(!data[s]) data[s]=[];
-  save(); render(); showToast("Adăugat");
+const s=document.getElementById("subject").value.trim();
+if(!s) return showToast("Scrie materie");
+if(data[s]) return showToast("Există deja");
+data[s]=[];
+save(); render();
 }
 
-function openModal(){
-  const s=document.getElementById("subjectSelect").value;
-  const g=Number(document.getElementById("grade").value);
-  if(!s||!g) return showToast("Completează");
-  data[s].push(g);
-  save(); render(); showToast("Notă adăugată");
+function deleteSubject(sub){
+delete data[sub];
+save(); render();
+showToast("Materie ștearsă");
+}
+
+function addGrade(){
+const s=document.getElementById("subjectSelect").value;
+const g=Number(document.getElementById("grade").value);
+if(!s||!g) return showToast("Completează");
+data[s].push(g);
+save(); render();
 }
 
 function del(sub,i){
-  data[sub].splice(i,1);
-  save(); render();
+data[sub].splice(i,1);
+save(); render();
 }
 
 function avg(arr){
-  return arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):0;
+return arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):0;
+}
+
+function loadTemplate(){
+const cls=document.getElementById("classSelect").value;
+if(!cls) return showToast("Alege clasa");
+
+const list=getTemplate(Number(cls));
+
+list.forEach(s=>{
+if(!data[s]) data[s]=[];
+});
+
+save(); render();
+showToast("Materii importate");
 }
 
 function render(){
-  const sel=document.getElementById("subjectSelect");
-  sel.innerHTML="";
+const sel=document.getElementById("subjectSelect");
+sel.innerHTML="";
 
-  Object.keys(data).forEach(s=>sel.innerHTML+=`<option>${s}</option>`);
+Object.keys(data).forEach(s=>{
+sel.innerHTML+=`<option>${s}</option>`;
+});
 
-  let best=null,worst=null;
+let best=null,worst=null;
 
-  Object.keys(data).forEach(s=>{
-    let a=parseFloat(avg(data[s]));
-    if(best===null||a>best.avg) best={s,avg:a};
-    if(worst===null||a<worst.avg) worst={s,avg:a};
-  });
+Object.keys(data).forEach(s=>{
+let a=parseFloat(avg(data[s]));
+if(best===null||a>best.avg) best={s,avg:a};
+if(worst===null||a<worst.avg) worst={s,avg:a};
+});
 
-  document.getElementById("stats").innerHTML=
-  best?`🏆 Cea mai bună: ${best.s} (${best.avg})<br>📉 Cea mai slabă: ${worst.s} (${worst.avg})`:"";
+document.getElementById("stats").innerHTML=
+best?`🏆 ${best.s} (${best.avg})<br>📉 ${worst.s} (${worst.avg})`:"";
 
-  const list=document.getElementById("list");
-  list.innerHTML="";
+const list=document.getElementById("list");
+list.innerHTML="";
 
-  Object.keys(data).forEach(sub=>{
-    list.innerHTML+=`
-      <div class="card">
-        <div class="row">
-          <b>${sub}</b>
-          <span>${avg(data[sub])}</span>
-        </div>
-        ${data[sub].map((g,i)=>`
-          <div class="grade">
-            ${g}
-            <button class="del" onclick="del('${sub}',${i})">X</button>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  });
-}
-
-function exportData(){
-  const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="grades.json";
-  a.click();
-}
-
-function importData(e){
-  const f=e.target.files[0];
-  const r=new FileReader();
-  r.onload=()=>{data=JSON.parse(r.result);save();render();};
-  r.readAsText(f);
+Object.keys(data).forEach(sub=>{
+list.innerHTML+=`
+<div class="card">
+<div class="row">
+<b>${sub}</b>
+<div>
+<button class="delSub" onclick="deleteSubject('${sub}')">🗑</button>
+</div>
+</div>
+<div>Media: ${avg(data[sub])}</div>
+${data[sub].map((g,i)=>`
+<div class="grade">
+${g}
+<button class="del" onclick="del('${sub}',${i})">X</button>
+</div>
+`).join('')}
+</div>
+`;
+});
 }
 
 render();
-</script></body>
+</script>
+
+</body>
 </html>
