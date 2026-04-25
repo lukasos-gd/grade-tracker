@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tracker Note</title>
+  <title>Grade Tracker Pro</title>
 
   <style>
     * { box-sizing: border-box; }
@@ -14,38 +14,19 @@
       font-family: Arial, sans-serif;
       background: #121212;
       color: white;
-      display: flex;
-      justify-content: center;
     }
 
     .container {
-      width: 100%;
-      max-width: 500px;
+      max-width: 600px;
+      margin: auto;
     }
 
-    h2 {
-      text-align: center;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-
-    button, select {
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #2a2a2a;
-      color: white;
-      font-size: 14px;
-    }
+    h2 { text-align: center; }
 
     input {
       width: 100%;
       padding: 14px;
-      margin: 10px 0;
+      margin: 8px 0;
       border-radius: 10px;
       border: 1px solid #333;
       background: #1e1e1e;
@@ -53,23 +34,25 @@
       font-size: 16px;
     }
 
-    button.add {
+    button {
       width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
       background: #4caf50;
+      color: white;
+      font-size: 16px;
       margin-top: 10px;
     }
 
-    ul {
-      list-style: none;
-      padding: 0;
-      margin-top: 20px;
-    }
-
-    li {
+    .card {
       background: #1e1e1e;
       padding: 12px;
-      margin: 8px 0;
+      margin-top: 15px;
       border-radius: 10px;
+    }
+
+    .row {
       display: flex;
       justify-content: space-between;
     }
@@ -78,8 +61,20 @@
       background: red;
       border: none;
       color: white;
-      padding: 6px 10px;
+      padding: 5px 10px;
       border-radius: 8px;
+    }
+
+    .stats {
+      margin-top: 15px;
+      background: #222;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .small {
+      font-size: 13px;
+      opacity: 0.8;
     }
   </style>
 </head>
@@ -87,98 +82,91 @@
 <body>
 
 <div class="container">
+  <h2>📚 Grade Tracker PRO</h2>
 
-  <div class="top-bar">
-    <h2 id="title">📚 Tracker Note</h2>
-    <select id="lang" onchange="setLang()">
-      <option value="ro">RO</option>
-      <option value="en">EN</option>
-    </select>
-  </div>
+  <input id="subject" placeholder="Materie (ex: Matematică)" />
+  <input id="grade" type="number" placeholder="Notă (ex: 9)" />
 
-  <input id="subject" type="text" placeholder="Materie / Subject" />
-  <input id="grade" type="number" placeholder="Notă / Grade" />
+  <button onclick="add()">Adaugă notă</button>
+  <button onclick="downloadData()" style="background:#2196f3">Export backup</button>
 
-  <button class="add" onclick="addGrade()" id="addBtn">Adaugă notă</button>
+  <div class="stats" id="stats"></div>
 
-  <ul id="list"></ul>
-
+  <div id="list"></div>
 </div>
 
 <script>
-let lang = localStorage.getItem("lang") || "ro";
-document.getElementById("lang").value = lang;
+let data = JSON.parse(localStorage.getItem("grades") || "[]");
 
-const texts = {
-  ro: {
-    title: "📚 Tracker Note",
-    subject: "Materie (ex: Matematică)",
-    grade: "Notă (ex: 9)",
-    add: "Adaugă notă",
-    empty: "Completează ambele câmpuri"
-  },
-  en: {
-    title: "📚 Grade Tracker",
-    subject: "Subject (e.g. Math)",
-    grade: "Grade (e.g. 9)",
-    add: "Add grade",
-    empty: "Fill both fields"
-  }
-};
-
-function applyLang() {
-  document.getElementById("title").innerText = texts[lang].title;
-  document.getElementById("subject").placeholder = texts[lang].subject;
-  document.getElementById("grade").placeholder = texts[lang].grade;
-  document.getElementById("addBtn").innerText = texts[lang].add;
+function save() {
+  localStorage.setItem("grades", JSON.stringify(data));
 }
 
-function setLang() {
-  lang = document.getElementById("lang").value;
-  localStorage.setItem("lang", lang);
-  applyLang();
-}
-
-applyLang();
-
-let grades = JSON.parse(localStorage.getItem("grades") || "[]");
-
-function render() {
-  const list = document.getElementById("list");
-  list.innerHTML = "";
-
-  grades.forEach((g, i) => {
-    list.innerHTML += `
-      <li>
-        ${g.subject} - ${g.grade}
-        <button class="del" onclick="del(${i})">X</button>
-      </li>
-    `;
-  });
-
-  localStorage.setItem("grades", JSON.stringify(grades));
-}
-
-function addGrade() {
+function add() {
   const s = document.getElementById("subject").value.trim();
-  const g = document.getElementById("grade").value.trim();
+  const g = Number(document.getElementById("grade").value);
 
-  if (!s || !g) {
-    alert(texts[lang].empty);
-    return;
-  }
+  if (!s || !g) return alert("Completează câmpurile");
 
-  grades.push({ subject: s, grade: g });
+  data.push({ subject: s, grade: g });
 
   document.getElementById("subject").value = "";
   document.getElementById("grade").value = "";
 
+  save();
   render();
 }
 
 function del(i) {
-  grades.splice(i, 1);
+  data.splice(i, 1);
+  save();
   render();
+}
+
+function avg(subject) {
+  const arr = data.filter(x => x.subject === subject);
+  if (!arr.length) return 0;
+  return (arr.reduce((a,b)=>a+b.grade,0) / arr.length).toFixed(2);
+}
+
+function render() {
+  const list = document.getElementById("list");
+  const stats = document.getElementById("stats");
+
+  list.innerHTML = "";
+
+  let subjects = [...new Set(data.map(x => x.subject))];
+
+  subjects.forEach(sub => {
+    let items = data.filter(x => x.subject === sub);
+
+    list.innerHTML += `
+      <div class="card">
+        <div class="row">
+          <b>${sub}</b>
+          <span>Media: ${avg(sub)}</span>
+        </div>
+        <div class="small">Note: ${items.map(i => i.grade).join(", ")}</div>
+      </div>
+    `;
+  });
+
+  stats.innerHTML = `
+    <b>Total note:</b> ${data.length}<br>
+    <b>Media generală:</b> ${
+      data.length ? (data.reduce((a,b)=>a+b.grade,0)/data.length).toFixed(2) : 0
+    }
+  `;
+}
+
+function downloadData() {
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "grades-backup.json";
+  a.click();
 }
 
 render();
