@@ -261,14 +261,123 @@ let action=null;
 let chart;
 let startX=0;
 
-const templates={
-6:["Biologia","Fizica","Matematica","Româna","Engleza"],
-7:["Biologia","Fizica","Matematica","Româna","Engleza","Chimia","Informatica"],
-8:["Biologia","Fizica","Matematica","Româna","Engleza","Chimia","Informatica"],
-9:["Biologia","Fizica","Matematica","Româna","Engleza","Chimia","Informatica"],
-10:["Biologia","Fizica","Matematica","Româna","Engleza","Chimia","Informatica"],
-11:["Biologia","Fizica","Matematica","Româna","Engleza","Chimia","Informatica"],
-12:["Biologia","Fizica","Matematica","Româna","Engleza","Chimia","Informatica"]
+const templates = {
+  6: [
+    "Biologia",
+    "Educație plastică",
+    "Educație tehnologică",
+    "Fizica",
+    "Geografia",
+    "Istoria românilor și universală",
+    "Limba engleză",
+    "Limba franceză",
+    "Limba și literatura română",
+    "Matematică",
+    "Educația fizică",
+    "Educație pentru societate"
+  ],
+
+  7: [
+    "Biologia",
+    "Educație plastică",
+    "Educație tehnologică",
+    "Fizica",
+    "Geografia",
+    "Istoria românilor și universală",
+    "Limba engleză",
+    "Limba franceză",
+    "Limba și literatura română",
+    "Matematică",
+    "Educația fizică",
+    "Educație pentru societate",
+    "Informatica",
+    "Chimia"
+  ],
+
+  8: [
+    "Biologia",
+    "Educație plastică",
+    "Educație tehnologică",
+    "Fizica",
+    "Geografia",
+    "Istoria românilor și universală",
+    "Limba engleză",
+    "Limba franceză",
+    "Limba și literatura română",
+    "Matematică",
+    "Educația fizică",
+    "Educație pentru societate",
+    "Informatica",
+    "Chimia"
+  ],
+
+  9: [
+    "Biologia",
+    "Educație plastică",
+    "Educație tehnologică",
+    "Fizica",
+    "Geografia",
+    "Istoria românilor și universală",
+    "Limba engleză",
+    "Limba franceză",
+    "Limba și literatura română",
+    "Matematică",
+    "Educația fizică",
+    "Educație pentru societate",
+    "Informatica",
+    "Chimia"
+  ],
+
+  10: [
+    "Biologia",
+    "Educație plastică",
+    "Educație tehnologică",
+    "Fizica",
+    "Geografia",
+    "Istoria românilor și universală",
+    "Limba engleză",
+    "Limba franceză",
+    "Limba și literatura română",
+    "Matematică",
+    "Educația fizică",
+    "Educație pentru societate",
+    "Informatica",
+    "Chimia"
+  ],
+
+  11: [
+    "Biologia",
+    "Educație plastică",
+    "Educație tehnologică",
+    "Fizica",
+    "Geografia",
+    "Istoria românilor și universală",
+    "Limba engleză",
+    "Limba franceză",
+    "Limba și literatura română",
+    "Matematică",
+    "Educația fizică",
+    "Educație pentru societate",
+    "Informatica",
+    "Chimia"
+  ],
+
+  12: [
+    "Biologia",
+    "Educație plastică",
+    "Educație tehnologică",
+    "Fizica",
+    "Geografia",
+    "Istoria românilor și universală",
+    "Limba engleză",
+    "Limba franceză",
+    "Limba și literatura română",
+    "Matematică",
+    "Educația fizică",
+    "Educație pentru societate",
+    "Informatica",
+    "Chimia"
+  ]
 };
 
 function save(){localStorage.setItem('data',JSON.stringify(data));}
