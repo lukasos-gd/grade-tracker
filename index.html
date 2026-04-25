@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="ro">
+<!DOCTYPE html><html lang="ro">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Grade Tracker Pro</title>
-
-  <style>
+  <title>Grade Tracker Pro++</title>  <style>
     * { box-sizing: border-box; }
 
     body {
@@ -17,13 +14,13 @@
     }
 
     .container {
-      max-width: 600px;
+      max-width: 650px;
       margin: auto;
     }
 
     h2 { text-align: center; }
 
-    input {
+    input, select {
       width: 100%;
       padding: 14px;
       margin: 8px 0;
@@ -48,129 +45,187 @@
     .card {
       background: #1e1e1e;
       padding: 12px;
-      margin-top: 15px;
+      margin-top: 12px;
       border-radius: 10px;
     }
 
     .row {
       display: flex;
       justify-content: space-between;
+      align-items: center;
+    }
+
+    .grade {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      background: #2a2a2a;
+      padding: 6px;
+      border-radius: 8px;
     }
 
     .del {
       background: red;
       border: none;
       color: white;
-      padding: 5px 10px;
-      border-radius: 8px;
+      padding: 4px 8px;
+      border-radius: 6px;
     }
 
-    .stats {
-      margin-top: 15px;
-      background: #222;
-      padding: 10px;
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      padding: 12px 18px;
       border-radius: 10px;
+      opacity: 0;
+      transition: 0.3s;
     }
 
-    .small {
-      font-size: 13px;
-      opacity: 0.8;
+    .toast.show { opacity: 1; }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
     }
-  </style>
-</head>
 
-<body>
+    .box {
+      background: #1e1e1e;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 400px;
+    }
+  </style></head>
+<body><!-- LOGIN --><div class="overlay" id="login">
+  <div class="box">
+    <h3>PIN</h3>
+    <input id="pinInput" type="password" placeholder="Introdu PIN" />
+    <button onclick="checkPin()">Intră</button>
+    <button onclick="setPin()" style="background:#2196f3">Setează PIN</button>
+  </div>
+</div><div class="container">
+  <h2>📚 Grade Tracker PRO++</h2>  <input id="subject" placeholder="Materie" />
+  <button onclick="addSubject()">Adaugă materie</button><select id="subjectSelect"></select> <input id="grade" type="number" placeholder="Notă" /> <button onclick="openModal()">Adaugă notă</button>
 
-<div class="container">
-  <h2>📚 Grade Tracker PRO</h2>
+<button onclick="exportData()" style="background:#2196f3">Export</button> <input type="file" onchange="importData(event)" />
 
-  <input id="subject" placeholder="Materie (ex: Matematică)" />
-  <input id="grade" type="number" placeholder="Notă (ex: 9)" />
-
-  <button onclick="add()">Adaugă notă</button>
-  <button onclick="downloadData()" style="background:#2196f3">Export backup</button>
-
-  <div class="stats" id="stats"></div>
-
+  <div id="stats"></div>
   <div id="list"></div>
-</div>
+</div><!-- MODAL --><div class="toast" id="toast"></div><script>
+let data = JSON.parse(localStorage.getItem("data") || "{}");
+let pin = localStorage.getItem("pin");
+let pending = null;
 
-<script>
-let data = JSON.parse(localStorage.getItem("grades") || "[]");
-
-function save() {
-  localStorage.setItem("grades", JSON.stringify(data));
+function showToast(msg){
+  const t=document.getElementById("toast");
+  t.innerText=msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),1500);
 }
 
-function add() {
-  const s = document.getElementById("subject").value.trim();
-  const g = Number(document.getElementById("grade").value);
-
-  if (!s || !g) return alert("Completează câmpurile");
-
-  data.push({ subject: s, grade: g });
-
-  document.getElementById("subject").value = "";
-  document.getElementById("grade").value = "";
-
-  save();
-  render();
+function setPin(){
+  const p=document.getElementById("pinInput").value;
+  if(!p) return showToast("PIN invalid");
+  localStorage.setItem("pin",p);
+  showToast("PIN setat");
 }
 
-function del(i) {
-  data.splice(i, 1);
-  save();
-  render();
+function checkPin(){
+  const p=document.getElementById("pinInput").value;
+  if(p===pin){
+    document.getElementById("login").style.display="none";
+    showToast("Bine ai venit");
+  } else showToast("PIN greșit");
 }
 
-function avg(subject) {
-  const arr = data.filter(x => x.subject === subject);
-  if (!arr.length) return 0;
-  return (arr.reduce((a,b)=>a+b.grade,0) / arr.length).toFixed(2);
+function save(){ localStorage.setItem("data",JSON.stringify(data)); }
+
+function addSubject(){
+  const s=document.getElementById("subject").value.trim();
+  if(!s) return showToast("Scrie materie");
+  if(!data[s]) data[s]=[];
+  save(); render(); showToast("Adăugat");
 }
 
-function render() {
-  const list = document.getElementById("list");
-  const stats = document.getElementById("stats");
+function openModal(){
+  const s=document.getElementById("subjectSelect").value;
+  const g=Number(document.getElementById("grade").value);
+  if(!s||!g) return showToast("Completează");
+  data[s].push(g);
+  save(); render(); showToast("Notă adăugată");
+}
 
-  list.innerHTML = "";
+function del(sub,i){
+  data[sub].splice(i,1);
+  save(); render();
+}
 
-  let subjects = [...new Set(data.map(x => x.subject))];
+function avg(arr){
+  return arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):0;
+}
 
-  subjects.forEach(sub => {
-    let items = data.filter(x => x.subject === sub);
+function render(){
+  const sel=document.getElementById("subjectSelect");
+  sel.innerHTML="";
 
-    list.innerHTML += `
+  Object.keys(data).forEach(s=>sel.innerHTML+=`<option>${s}</option>`);
+
+  let best=null,worst=null;
+
+  Object.keys(data).forEach(s=>{
+    let a=parseFloat(avg(data[s]));
+    if(best===null||a>best.avg) best={s,avg:a};
+    if(worst===null||a<worst.avg) worst={s,avg:a};
+  });
+
+  document.getElementById("stats").innerHTML=
+  best?`🏆 Cea mai bună: ${best.s} (${best.avg})<br>📉 Cea mai slabă: ${worst.s} (${worst.avg})`:"";
+
+  const list=document.getElementById("list");
+  list.innerHTML="";
+
+  Object.keys(data).forEach(sub=>{
+    list.innerHTML+=`
       <div class="card">
         <div class="row">
           <b>${sub}</b>
-          <span>Media: ${avg(sub)}</span>
+          <span>${avg(data[sub])}</span>
         </div>
-        <div class="small">Note: ${items.map(i => i.grade).join(", ")}</div>
+        ${data[sub].map((g,i)=>`
+          <div class="grade">
+            ${g}
+            <button class="del" onclick="del('${sub}',${i})">X</button>
+          </div>
+        `).join('')}
       </div>
     `;
   });
-
-  stats.innerHTML = `
-    <b>Total note:</b> ${data.length}<br>
-    <b>Media generală:</b> ${
-      data.length ? (data.reduce((a,b)=>a+b.grade,0)/data.length).toFixed(2) : 0
-    }
-  `;
 }
 
-function downloadData() {
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "grades-backup.json";
+function exportData(){
+  const blob=new Blob([JSON.stringify(data)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="grades.json";
   a.click();
 }
 
-render();
-</script>
+function importData(e){
+  const f=e.target.files[0];
+  const r=new FileReader();
+  r.onload=()=>{data=JSON.parse(r.result);save();render();};
+  r.readAsText(f);
+}
 
-</body>
+render();
+</script></body>
 </html>
