@@ -1,70 +1,89 @@
-<!DOCTYPE html><html lang="ro">
+<!DOCTYPE html>
+<html lang="ro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grade Tracker</title><style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:system-ui,Arial;
-  background:#0f172a;
-  color:#e2e8f0;
-}
-.container{
-  max-width:700px;
-  margin:auto;
-  padding:20px;
-}
-h2{text-align:center;margin-bottom:20px}
+<title>Grade Tracker FINAL</title>
 
-.card{
-  background:#1e293b;
-  border-radius:14px;
-  padding:14px;
-  margin-top:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,.3);
-}
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,Arial;background:#0f172a;color:#e2e8f0}
+.container{max-width:720px;margin:auto;padding:12px 12px 70px}
+h2{text-align:center;margin:10px 0 12px;font-size:20px;opacity:.9}
+.header{position:sticky;top:0;background:#0f172a;padding-bottom:10px;z-index:5}
+
+.input-row{display:flex;gap:8px;margin-bottom:8px}
 
 input,select{
-  width:100%;
-  padding:12px;
-  margin:6px 0;
+  flex:1;
+  padding:10px;
   border-radius:10px;
   border:1px solid #334155;
-  background:#0f172a;
+  background:#020617;
   color:#fff;
 }
 
-button{
-  width:100%;
-  padding:12px;
+.btn{
+  padding:10px 14px;
   border:none;
   border-radius:10px;
-  background:#22c55e;
-  color:white;
   font-weight:600;
-  margin-top:6px;
+  cursor:pointer;
+  transition:.15s;
 }
+.btn:active{transform:scale(.96)}
 
-button.secondary{background:#3b82f6}
-button.danger{background:#ef4444}
+.btn-primary{background:#22c55e}
+.btn-secondary{background:#3b82f6}
+.btn-danger{background:#ef4444}
 
-.row{
+.btn-icon{
+  width:34px;
+  height:34px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:center;
+  border-radius:10px;
 }
+
+.card{
+  background:#1e293b;
+  border-radius:16px;
+  padding:14px;
+  margin-top:12px;
+  box-shadow:0 6px 25px rgba(0,0,0,.35);
+}
+
+.row{display:flex;justify-content:space-between;align-items:center}
 
 .grade{
   display:flex;
   justify-content:space-between;
-  background:#0f172a;
-  padding:8px;
-  border-radius:8px;
-  margin-top:6px;
+  align-items:center;
+  background:#020617;
+  padding:10px;
+  border-radius:12px;
+  margin-top:8px;
+  position:relative;
+  overflow:hidden;
 }
 
-/* MODAL */
+/* swipe */
+.swipe{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  background:#ef4444;
+  color:white;
+  padding-right:14px;
+  transform:translateX(100%);
+  transition:.2s;
+}
+.grade.swiped .swipe{transform:translateX(0)}
+
+/* modal */
 .modal-bg{
   position:fixed;
   inset:0;
@@ -75,13 +94,13 @@ button.danger{background:#ef4444}
 }
 .modal{
   background:#1e293b;
-  padding:20px;
-  border-radius:12px;
+  padding:18px;
+  border-radius:14px;
   width:90%;
-  max-width:400px;
+  max-width:360px;
 }
 
-/* TOAST */
+/* toast */
 .toast{
   position:fixed;
   bottom:20px;
@@ -94,121 +113,232 @@ button.danger{background:#ef4444}
   transition:.3s;
 }
 .toast.show{opacity:1}
-</style></head><body><div class="container">
-<h2>Grade Tracker</h2><input id="subject" placeholder="Materie">
-<button onclick="addSubject()">Adaugă materie</button><select id="subjectSelect"></select> <input id="grade" type="number" placeholder="Notă"> <button onclick="addGrade()">Adaugă notă</button>
 
-<div id="stats"></div>
-<div id="list"></div>
-</div><!-- MODAL --><div class="modal-bg" id="modalBg">
-  <div class="modal">
-    <p id="modalText">Confirm?</p>
-    <button onclick="confirmAction()">Confirmă</button>
-    <button class="secondary" onclick="closeModal()">Anulează</button>
-  </div>
-</div><div class="toast" id="toast"></div><script>
-let data = JSON.parse(localStorage.getItem("data")||"{}");
-let action = null;
-
-function save(){localStorage.setItem("data",JSON.stringify(data));}
-
-function toast(msg){
-  const t=document.getElementById("toast");
-  t.innerText=msg;
-  t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),1500);
+/* tabs */
+.bottom{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  background:#020617;
+  border-top:1px solid #334155;
+  display:flex;
 }
+.bottom button{
+  flex:1;
+  background:none;
+  border:none;
+  color:#94a3b8;
+  padding:10px;
+}
+.bottom .active{color:#22c55e}
 
-function openModal(text,fn){
-  document.getElementById("modalText").innerText=text;
-  document.getElementById("modalBg").style.display="flex";
+.chart{
+  margin-top:12px;
+  background:#020617;
+  border-radius:12px;
+  padding:10px;
+}
+canvas{width:100%!important;height:200px!important}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+<h2>Grade Tracker</h2>
+
+<div class="input-row">
+  <input id="subject" placeholder="Materie">
+  <button class="btn btn-primary" onclick="addSubject()">+</button>
+</div>
+
+<div class="input-row">
+  <select id="subjectSelect"></select>
+  <input id="grade" type="number" placeholder="Notă">
+  <button class="btn btn-primary" onclick="addGrade()">+</button>
+</div>
+</div>
+
+<div id="view-subjects">
+<div id="list"></div>
+</div>
+
+<div id="view-stats" style="display:none">
+<div class="chart">
+<canvas id="chart"></canvas>
+</div>
+</div>
+
+<div id="view-settings" style="display:none">
+<div class="card">
+<button class="btn btn-danger" onclick="clearAll()">Reset Data</button>
+</div>
+</div>
+
+</div>
+
+<div class="modal-bg" id="modalBg">
+<div class="modal">
+<p id="modalText">Confirm?</p>
+<div class="input-row">
+<button class="btn btn-primary" onclick="confirmAction()">OK</button>
+<button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="bottom">
+<button class="active" onclick="switchTab('subjects',this)">Subjects</button>
+<button onclick="switchTab('stats',this)">Stats</button>
+<button onclick="switchTab('settings',this)">Settings</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let data = JSON.parse(localStorage.getItem('data')||'{}');
+let action = null;
+let chart;
+
+function save(){localStorage.setItem('data',JSON.stringify(data));}
+function toast(m){
+  const t=document.getElementById('toast');
+  t.innerText=m;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1500);
+}
+function openModal(t,fn){
+  document.getElementById('modalText').innerText=t;
+  document.getElementById('modalBg').style.display='flex';
   action=fn;
 }
-
-function closeModal(){
-  document.getElementById("modalBg").style.display="none";
-}
-
-function confirmAction(){
-  if(action) action();
-  closeModal();
-}
+function closeModal(){document.getElementById('modalBg').style.display='none';}
+function confirmAction(){if(action) action(); closeModal();}
 
 function addSubject(){
-  const s=document.getElementById("subject").value.trim();
-  if(!s) return toast("Completează materie");
-  if(data[s]) return toast("Există deja");
+  const s=subject.value.trim();
+  if(!s) return toast('Completează');
+  if(data[s]) return toast('Există');
   data[s]=[];
+  subject.value='';
   save(); render();
-}
-
-function deleteSubject(sub){
-  openModal("Ștergi materia?",()=>{
-    delete data[sub];
-    save(); render();
-    toast("Șters");
-  });
 }
 
 function addGrade(){
-  const s=document.getElementById("subjectSelect").value;
-  const g=Number(document.getElementById("grade").value);
-  if(!s||!g) return toast("Completează");
+  const s=subjectSelect.value;
+  const g=Number(grade.value);
+  if(!s||!g) return toast('Completează');
   data[s].push(g);
+  grade.value='';
   save(); render();
 }
 
-function deleteGrade(sub,i){
-  openModal("Ștergi nota?",()=>{
-    data[sub].splice(i,1);
+function deleteSubject(s){
+  openModal('Ștergi materia?',()=>{
+    delete data[s];
     save(); render();
-    toast("Șters");
   });
 }
 
-function avg(arr){return arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):0}
+function deleteGrade(s,i){
+  openModal('Ștergi nota?',()=>{
+    data[s].splice(i,1);
+    save(); render();
+  });
+}
+
+function clearAll(){
+  openModal('Ștergi tot?',()=>{
+    data={};
+    save(); render();
+  });
+}
+
+function avg(a){
+  return a.length?(a.reduce((x,y)=>x+y,0)/a.length).toFixed(2):0;
+}
 
 function render(){
-  const sel=document.getElementById("subjectSelect");
-  sel.innerHTML="";
-
+  subjectSelect.innerHTML='';
   Object.keys(data).forEach(s=>{
-    sel.innerHTML+=`<option>${s}</option>`;
+    subjectSelect.innerHTML+=`<option>${s}</option>`;
   });
 
-  let best=null,worst=null;
-
-  Object.keys(data).forEach(s=>{
-    let a=parseFloat(avg(data[s]));
-    if(best===null||a>best.avg) best={s,avg:a};
-    if(worst===null||a<worst.avg) worst={s,avg:a};
-  });
-
-  document.getElementById("stats").innerHTML=
-    best?`Best: ${best.s} (${best.avg})<br>Worst: ${worst.s} (${worst.avg})`:"";
-
-  const list=document.getElementById("list");
-  list.innerHTML="";
-
+  list.innerHTML='';
   Object.keys(data).forEach(sub=>{
     list.innerHTML+=`
     <div class="card">
       <div class="row">
         <b>${sub}</b>
-        <button class="danger" onclick="deleteSubject('${sub}')">Delete</button>
+        <button class="btn btn-danger btn-icon" onclick="deleteSubject('${sub}')">🗑</button>
       </div>
-      <div>Average: ${avg(data[sub])}</div>
+      <div>Avg: ${avg(data[sub])}</div>
       ${data[sub].map((g,i)=>`
-        <div class="grade">
-          ${g}
-          <button class="danger" onclick="deleteGrade('${sub}',${i})">X</button>
+        <div class="grade"
+          ontouchstart="startSwipe(event,this)"
+          ontouchend="endSwipe(event,this,'${sub}',${i})"
+          onmousedown="holdStart(event,'${sub}',${i})">
+          <div>${g}</div>
+          <button class="btn btn-danger btn-icon" onclick="deleteGrade('${sub}',${i})">✕</button>
+          <div class="swipe">Delete</div>
         </div>
       `).join('')}
     </div>
     `;
   });
+
+  renderChart();
+}
+
+let startX=0;
+function startSwipe(e){startX=e.touches[0].clientX;}
+function endSwipe(e,el,s,i){
+  let dx=e.changedTouches[0].clientX-startX;
+  if(dx<-60){
+    el.classList.add('swiped');
+    setTimeout(()=>deleteGrade(s,i),300);
+  }
+}
+
+let holdTimer;
+function holdStart(e,s,i){
+  holdTimer=setTimeout(()=>{
+    let val=prompt('Edit grade',data[s][i]);
+    if(val!==null){
+      data[s][i]=Number(val);
+      save(); render();
+    }
+  },600);
+}
+document.addEventListener('mouseup',()=>clearTimeout(holdTimer));
+
+function switchTab(t,btn){
+  document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.getElementById('view-subjects').style.display = t==='subjects'?'block':'none';
+  document.getElementById('view-stats').style.display = t==='stats'?'block':'none';
+  document.getElementById('view-settings').style.display = t==='settings'?'block':'none';
+}
+
+function renderChart(){
+  const labels=Object.keys(data);
+  const values=labels.map(s=>Number(avg(data[s])));
+  if(chart) chart.destroy();
+
+  chart=new Chart(document.getElementById('chart'),{
+    type:'bar',
+    data:{labels,datasets:[{data:values}]},
+    options:{plugins:{legend:{display:false}}}
+  });
 }
 
 render();
-</script></body>
+</script>
+
+</body>
 </html>
