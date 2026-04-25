@@ -1,282 +1,214 @@
-<!DOCTYPE html>
-<html lang="ro">
+<!DOCTYPE html><html lang="ro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grade Tracker ULTRA</title>
+<title>Grade Tracker</title><style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:#0f172a;
+  color:#e2e8f0;
+}
+.container{
+  max-width:700px;
+  margin:auto;
+  padding:20px;
+}
+h2{text-align:center;margin-bottom:20px}
 
-<style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  padding: 20px;
-  font-family: Arial;
-  background: #121212;
-  color: white;
+.card{
+  background:#1e293b;
+  border-radius:14px;
+  padding:14px;
+  margin-top:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
 }
 
-.container {
-  max-width: 650px;
-  margin: auto;
+input,select{
+  width:100%;
+  padding:12px;
+  margin:6px 0;
+  border-radius:10px;
+  border:1px solid #334155;
+  background:#0f172a;
+  color:#fff;
 }
 
-input, select {
-  width: 100%;
-  padding: 12px;
-  margin: 6px 0;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #1e1e1e;
-  color: white;
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#22c55e;
+  color:white;
+  font-weight:600;
+  margin-top:6px;
 }
 
-button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 6px;
-  border: none;
-  border-radius: 10px;
-  background: #4caf50;
-  color: white;
-}
+button.secondary{background:#3b82f6}
+button.danger{background:#ef4444}
 
-.card {
-  background: #1e1e1e;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 10px;
-}
-
-.row {
-  display: flex;
-  justify-content: space-between;
-}
-
-.grade {
-  display: flex;
-  justify-content: space-between;
-  background: #2a2a2a;
-  margin-top: 5px;
-  padding: 6px;
-  border-radius: 6px;
-}
-
-.del { background:red; border:none; color:white; padding:4px 8px; }
-.delSub { background:#ff8800; }
-
-.toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  padding: 10px 16px;
-  border-radius: 10px;
-  opacity: 0;
-}
-
-.toast.show { opacity: 1; }
-
-.overlay {
-  position: fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:#000;
+.row{
   display:flex;
-  justify-content:center;
+  justify-content:space-between;
   align-items:center;
 }
 
-.box {
-  background:#1e1e1e;
-  padding:20px;
-  border-radius:10px;
+.grade{
+  display:flex;
+  justify-content:space-between;
+  background:#0f172a;
+  padding:8px;
+  border-radius:8px;
+  margin-top:6px;
 }
-</style>
-</head>
 
-<body>
+/* MODAL */
+.modal-bg{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+.modal{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  width:90%;
+  max-width:400px;
+}
 
-<!-- LOGIN -->
-<div class="overlay" id="login">
-  <div class="box">
-    <h3>PIN</h3>
-    <input id="pinInput" type="password">
-    <button onclick="checkPin()">Intră</button>
-    <button onclick="setPin()" style="background:#2196f3">Set PIN</button>
-  </div>
-</div>
-
-<div class="container">
-<h2>📚 Grade Tracker ULTRA</h2>
-
-<select id="classSelect">
-<option value="">Alege clasa</option>
-<option>6</option>
-<option>7</option>
-<option>8</option>
-<option>9</option>
-<option>10</option>
-<option>11</option>
-<option>12</option>
-</select>
-
-<button onclick="loadTemplate()">Importă materii</button>
-
-<input id="subject" placeholder="Materie nouă">
-<button onclick="addSubject()">Adaugă materie</button>
-
-<select id="subjectSelect"></select>
-<input id="grade" type="number" placeholder="Notă">
-<button onclick="addGrade()">Adaugă notă</button>
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#1e293b;
+  padding:12px 18px;
+  border-radius:10px;
+  opacity:0;
+  transition:.3s;
+}
+.toast.show{opacity:1}
+</style></head><body><div class="container">
+<h2>Grade Tracker</h2><input id="subject" placeholder="Materie">
+<button onclick="addSubject()">Adaugă materie</button><select id="subjectSelect"></select> <input id="grade" type="number" placeholder="Notă"> <button onclick="addGrade()">Adaugă notă</button>
 
 <div id="stats"></div>
 <div id="list"></div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
+</div><!-- MODAL --><div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <p id="modalText">Confirm?</p>
+    <button onclick="confirmAction()">Confirmă</button>
+    <button class="secondary" onclick="closeModal()">Anulează</button>
+  </div>
+</div><div class="toast" id="toast"></div><script>
 let data = JSON.parse(localStorage.getItem("data")||"{}");
-let pin = localStorage.getItem("pin")||"";
+let action = null;
 
-const templates = {
-6:[
-"Biologia","Educație plastică","Educație tehnologică","Fizica","Geografia",
-"Istoria românilor și universală","Limba engleză","Limba franceză",
-"Limba și literatura română","Matematică","Educația fizică","Educație pentru societate"
-],
-7:[
-"Biologia","Educație plastică","Educație tehnologică","Fizica","Geografia",
-"Istoria românilor și universală","Limba engleză","Limba franceză",
-"Limba și literatura română","Matematică","Educația fizică","Educație pentru societate",
-"Informatica","Chimia"
-]
-};
+function save(){localStorage.setItem("data",JSON.stringify(data));}
 
-function getTemplate(cls){
-if(cls>=7) return templates[7];
-return templates[6];
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.innerText=msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),1500);
 }
 
-function showToast(msg){
-const t=document.getElementById("toast");
-t.innerText=msg;
-t.classList.add("show");
-setTimeout(()=>t.classList.remove("show"),1500);
+function openModal(text,fn){
+  document.getElementById("modalText").innerText=text;
+  document.getElementById("modalBg").style.display="flex";
+  action=fn;
 }
 
-function setPin(){
-const p=document.getElementById("pinInput").value;
-if(!p) return showToast("PIN invalid");
-localStorage.setItem("pin",p);
-pin=p;
-showToast("PIN setat");
+function closeModal(){
+  document.getElementById("modalBg").style.display="none";
 }
 
-function checkPin(){
-const p=document.getElementById("pinInput").value;
-if(!pin) return showToast("Setează PIN");
-if(p===pin){
-document.getElementById("login").style.display="none";
-}else showToast("PIN greșit");
-}
-
-function save(){
-localStorage.setItem("data",JSON.stringify(data));
+function confirmAction(){
+  if(action) action();
+  closeModal();
 }
 
 function addSubject(){
-const s=document.getElementById("subject").value.trim();
-if(!s) return showToast("Scrie materie");
-if(data[s]) return showToast("Există deja");
-data[s]=[];
-save(); render();
+  const s=document.getElementById("subject").value.trim();
+  if(!s) return toast("Completează materie");
+  if(data[s]) return toast("Există deja");
+  data[s]=[];
+  save(); render();
 }
 
 function deleteSubject(sub){
-delete data[sub];
-save(); render();
-showToast("Materie ștearsă");
+  openModal("Ștergi materia?",()=>{
+    delete data[sub];
+    save(); render();
+    toast("Șters");
+  });
 }
 
 function addGrade(){
-const s=document.getElementById("subjectSelect").value;
-const g=Number(document.getElementById("grade").value);
-if(!s||!g) return showToast("Completează");
-data[s].push(g);
-save(); render();
+  const s=document.getElementById("subjectSelect").value;
+  const g=Number(document.getElementById("grade").value);
+  if(!s||!g) return toast("Completează");
+  data[s].push(g);
+  save(); render();
 }
 
-function del(sub,i){
-data[sub].splice(i,1);
-save(); render();
+function deleteGrade(sub,i){
+  openModal("Ștergi nota?",()=>{
+    data[sub].splice(i,1);
+    save(); render();
+    toast("Șters");
+  });
 }
 
-function avg(arr){
-return arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):0;
-}
-
-function loadTemplate(){
-const cls=document.getElementById("classSelect").value;
-if(!cls) return showToast("Alege clasa");
-
-const list=getTemplate(Number(cls));
-
-list.forEach(s=>{
-if(!data[s]) data[s]=[];
-});
-
-save(); render();
-showToast("Materii importate");
-}
+function avg(arr){return arr.length?(arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(2):0}
 
 function render(){
-const sel=document.getElementById("subjectSelect");
-sel.innerHTML="";
+  const sel=document.getElementById("subjectSelect");
+  sel.innerHTML="";
 
-Object.keys(data).forEach(s=>{
-sel.innerHTML+=`<option>${s}</option>`;
-});
+  Object.keys(data).forEach(s=>{
+    sel.innerHTML+=`<option>${s}</option>`;
+  });
 
-let best=null,worst=null;
+  let best=null,worst=null;
 
-Object.keys(data).forEach(s=>{
-let a=parseFloat(avg(data[s]));
-if(best===null||a>best.avg) best={s,avg:a};
-if(worst===null||a<worst.avg) worst={s,avg:a};
-});
+  Object.keys(data).forEach(s=>{
+    let a=parseFloat(avg(data[s]));
+    if(best===null||a>best.avg) best={s,avg:a};
+    if(worst===null||a<worst.avg) worst={s,avg:a};
+  });
 
-document.getElementById("stats").innerHTML=
-best?`🏆 ${best.s} (${best.avg})<br>📉 ${worst.s} (${worst.avg})`:"";
+  document.getElementById("stats").innerHTML=
+    best?`Best: ${best.s} (${best.avg})<br>Worst: ${worst.s} (${worst.avg})`:"";
 
-const list=document.getElementById("list");
-list.innerHTML="";
+  const list=document.getElementById("list");
+  list.innerHTML="";
 
-Object.keys(data).forEach(sub=>{
-list.innerHTML+=`
-<div class="card">
-<div class="row">
-<b>${sub}</b>
-<div>
-<button class="delSub" onclick="deleteSubject('${sub}')">🗑</button>
-</div>
-</div>
-<div>Media: ${avg(data[sub])}</div>
-${data[sub].map((g,i)=>`
-<div class="grade">
-${g}
-<button class="del" onclick="del('${sub}',${i})">X</button>
-</div>
-`).join('')}
-</div>
-`;
-});
+  Object.keys(data).forEach(sub=>{
+    list.innerHTML+=`
+    <div class="card">
+      <div class="row">
+        <b>${sub}</b>
+        <button class="danger" onclick="deleteSubject('${sub}')">Delete</button>
+      </div>
+      <div>Average: ${avg(data[sub])}</div>
+      ${data[sub].map((g,i)=>`
+        <div class="grade">
+          ${g}
+          <button class="danger" onclick="deleteGrade('${sub}',${i})">X</button>
+        </div>
+      `).join('')}
+    </div>
+    `;
+  });
 }
 
 render();
-</script>
-
-</body>
+</script></body>
 </html>
