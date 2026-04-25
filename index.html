@@ -2,8 +2,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grade Tracker APP LEVEL</title><style>
+<title>Grade Tracker</title><style>
 *{box-sizing:border-box}
+
 body{
   margin:0;
   font-family:system-ui,Arial;
@@ -27,6 +28,7 @@ h2{
 .page{
   animation:fade .25s ease;
 }
+
 @keyframes fade{
   from{opacity:0;transform:translateY(8px)}
   to{opacity:1;transform:translateY(0)}
@@ -42,6 +44,7 @@ h2{
   background:#0b1220;
   border-top:1px solid #1f2937;
 }
+
 .tabs button{
   flex:1;
   padding:12px;
@@ -50,7 +53,10 @@ h2{
   color:#94a3b8;
   font-weight:600;
 }
-.tabs .active{color:#22c55e}
+
+.tabs .active{
+  color:#22c55e;
+}
 
 /* CARDS */
 .card{
@@ -60,25 +66,47 @@ h2{
   margin-top:12px;
   box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
-.row{display:flex;justify-content:space-between;align-items:center}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
 /* INPUT */
-.input-row{display:flex;gap:8px;margin-top:8px}
+.input-row{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+  align-items:stretch;
+}
+
+/* FIX: prevent overflow on mobile */
 input,select{
   flex:1;
+  min-width:0;
   padding:10px;
   border-radius:10px;
   border:1px solid #1f2937;
   background:#0b1220;
   color:#fff;
 }
+
+/* FIX: buttons behave properly in flex */
 button{
   padding:10px 12px;
   border:none;
   border-radius:10px;
   font-weight:600;
   cursor:pointer;
+  flex-shrink:0;
+  white-space:nowrap;
 }
+
+.input-row button{
+  min-width:44px;
+}
+
 .primary{background:#22c55e;color:#fff}
 .danger{background:#ef4444;color:#fff}
 .blue{background:#3b82f6;color:#fff}
@@ -89,12 +117,17 @@ button{
   grid-template-columns:repeat(2,1fr);
   gap:10px;
 }
+
 .stat{
   background:#0f172a;
   padding:12px;
   border-radius:12px;
 }
-.big{grid-column:span 2;text-align:center}
+
+.big{
+  grid-column:span 2;
+  text-align:center;
+}
 
 /* GRADES */
 .grade{
@@ -111,11 +144,7 @@ button{
   user-select:none;
 }
 
-.grade .actions{
-  display:flex;
-  gap:6px;
-}
-
+/* swipe background */
 .swipe-bg{
   position:absolute;
   inset:0;
@@ -143,6 +172,7 @@ button{
   align-items:center;
   justify-content:center;
 }
+
 .modal{
   background:#111827;
   padding:16px;
@@ -150,6 +180,7 @@ button{
   width:90%;
   max-width:360px;
 }
+
 .modal input{
   width:100%;
   margin-top:8px;
@@ -160,6 +191,7 @@ button{
   color:#fff;
 }
 
+/* TOAST */
 .toast{
   position:fixed;
   bottom:70px;
@@ -171,11 +203,18 @@ button{
   opacity:0;
   transition:.2s;
 }
-.toast.show{opacity:1}
 
-canvas{width:100%!important;height:220px!important}
+.toast.show{
+  opacity:1;
+}
+
+/* CHART */
+canvas{
+  width:100%!important;
+  height:220px!important;
+}
 </style></head><body><div class="container">
-<h2>Grade Tracker APP LEVEL</h2><div id="home" class="page"><div class="card">
+<h2>Grade Tracker</h2><div id="home" class="page"><div class="card">
 <div class="input-row">
 <input id="subject" placeholder="Materie">
 <button class="primary" onclick="addSubject()">+</button>
