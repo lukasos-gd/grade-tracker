@@ -1,89 +1,140 @@
-<!DOCTYPE html>
-<html lang="ro">
+<!DOCTYPE html><html lang="ro">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Grade Tracker FINAL</title>
-
-<style>
+<title>Grade Tracker APP LEVEL</title><style>
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,Arial;background:#0f172a;color:#e2e8f0}
-.container{max-width:720px;margin:auto;padding:12px 12px 70px}
-h2{text-align:center;margin:10px 0 12px;font-size:20px;opacity:.9}
-.header{position:sticky;top:0;background:#0f172a;padding-bottom:10px;z-index:5}
+body{
+  margin:0;
+  font-family:system-ui,Arial;
+  background:#0a0f1a;
+  color:#e5e7eb;
+}
 
-.input-row{display:flex;gap:8px;margin-bottom:8px}
+.container{
+  max-width:760px;
+  margin:auto;
+  padding:12px 12px 90px;
+}
 
+h2{
+  text-align:center;
+  margin:10px 0;
+  font-size:20px;
+}
+
+/* TOP ANIMATION */
+.page{
+  animation:fade .25s ease;
+}
+@keyframes fade{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* TABS */
+.tabs{
+  position:fixed;
+  bottom:0;
+  left:0;
+  width:100%;
+  display:flex;
+  background:#0b1220;
+  border-top:1px solid #1f2937;
+}
+.tabs button{
+  flex:1;
+  padding:12px;
+  border:none;
+  background:none;
+  color:#94a3b8;
+  font-weight:600;
+}
+.tabs .active{color:#22c55e}
+
+/* CARDS */
+.card{
+  background:#111827;
+  border-radius:14px;
+  padding:14px;
+  margin-top:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+.row{display:flex;justify-content:space-between;align-items:center}
+
+/* INPUT */
+.input-row{display:flex;gap:8px;margin-top:8px}
 input,select{
   flex:1;
   padding:10px;
   border-radius:10px;
-  border:1px solid #334155;
-  background:#020617;
+  border:1px solid #1f2937;
+  background:#0b1220;
   color:#fff;
 }
-
-.btn{
-  padding:10px 14px;
+button{
+  padding:10px 12px;
   border:none;
   border-radius:10px;
   font-weight:600;
   cursor:pointer;
-  transition:.15s;
 }
-.btn:active{transform:scale(.96)}
+.primary{background:#22c55e;color:#fff}
+.danger{background:#ef4444;color:#fff}
+.blue{background:#3b82f6;color:#fff}
 
-.btn-primary{background:#22c55e}
-.btn-secondary{background:#3b82f6}
-.btn-danger{background:#ef4444}
-
-.btn-icon{
-  width:34px;
-  height:34px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:10px;
+/* STATS */
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
 }
-
-.card{
-  background:#1e293b;
-  border-radius:16px;
-  padding:14px;
-  margin-top:12px;
-  box-shadow:0 6px 25px rgba(0,0,0,.35);
+.stat{
+  background:#0f172a;
+  padding:12px;
+  border-radius:12px;
 }
+.big{grid-column:span 2;text-align:center}
 
-.row{display:flex;justify-content:space-between;align-items:center}
-
+/* GRADES */
 .grade{
+  position:relative;
+  overflow:hidden;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  background:#020617;
-  padding:10px;
-  border-radius:12px;
+  padding:12px;
   margin-top:8px;
-  position:relative;
-  overflow:hidden;
+  border-radius:12px;
+  background:#0b1220;
+  touch-action:pan-y;
+  user-select:none;
 }
 
-/* swipe */
-.swipe{
+.grade .actions{
+  display:flex;
+  gap:6px;
+}
+
+.swipe-bg{
   position:absolute;
   inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
   background:#ef4444;
-  color:white;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
   padding-right:14px;
   transform:translateX(100%);
-  transition:.2s;
+  transition:transform .2s ease;
+  color:white;
+  font-weight:600;
 }
-.grade.swiped .swipe{transform:translateX(0)}
 
-/* modal */
+.grade.swiped .swipe-bg{
+  transform:translateX(0);
+}
+
+/* MODAL */
 .modal-bg{
   position:fixed;
   inset:0;
@@ -93,252 +144,189 @@ input,select{
   justify-content:center;
 }
 .modal{
-  background:#1e293b;
-  padding:18px;
-  border-radius:14px;
+  background:#111827;
+  padding:16px;
+  border-radius:12px;
   width:90%;
   max-width:360px;
 }
+.modal input{
+  width:100%;
+  margin-top:8px;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #1f2937;
+  background:#0b1220;
+  color:#fff;
+}
 
-/* toast */
 .toast{
   position:fixed;
-  bottom:20px;
+  bottom:70px;
   left:50%;
   transform:translateX(-50%);
-  background:#1e293b;
-  padding:12px 18px;
+  background:#111827;
+  padding:10px 14px;
   border-radius:10px;
   opacity:0;
-  transition:.3s;
+  transition:.2s;
 }
 .toast.show{opacity:1}
 
-/* tabs */
-.bottom{
-  position:fixed;
-  bottom:0;
-  left:0;
-  width:100%;
-  background:#020617;
-  border-top:1px solid #334155;
-  display:flex;
-}
-.bottom button{
-  flex:1;
-  background:none;
-  border:none;
-  color:#94a3b8;
-  padding:10px;
-}
-.bottom .active{color:#22c55e}
-
-.chart{
-  margin-top:12px;
-  background:#020617;
-  border-radius:12px;
-  padding:10px;
-}
-canvas{width:100%!important;height:200px!important}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-
-<div class="header">
-<h2>Grade Tracker</h2>
-
+canvas{width:100%!important;height:220px!important}
+</style></head><body><div class="container">
+<h2>Grade Tracker APP LEVEL</h2><div id="home" class="page"><div class="card">
 <div class="input-row">
-  <input id="subject" placeholder="Materie">
-  <button class="btn btn-primary" onclick="addSubject()">+</button>
+<input id="subject" placeholder="Materie">
+<button class="primary" onclick="addSubject()">+</button>
+</div><div class="input-row">
+<select id="subjectSelect"></select>
+<input id="grade" type="number" placeholder="Notă">
+<button class="primary" onclick="addGrade()">+</button>
 </div>
-
-<div class="input-row">
-  <select id="subjectSelect"></select>
-  <input id="grade" type="number" placeholder="Notă">
-  <button class="btn btn-primary" onclick="addGrade()">+</button>
-</div>
-</div>
-
-<div id="view-subjects">
-<div id="list"></div>
-</div>
-
-<div id="view-stats" style="display:none">
-<div class="chart">
-<canvas id="chart"></canvas>
-</div>
-</div>
-
-<div id="view-settings" style="display:none">
+</div><div id="list"></div>
+</div><div id="statsPage" class="page" style="display:none">
 <div class="card">
-<button class="btn btn-danger" onclick="clearAll()">Reset Data</button>
+<canvas id="chart"></canvas>
+</div><div class="stats-grid" id="stats"></div>
+</div><div id="settingsPage" class="page" style="display:none">
+<div class="card">
+<h3>Templates</h3>
+<select id="classSelect">
+<option value="6">Clasa 6</option>
+<option value="7">Clasa 7</option>
+<option value="8">Clasa 8</option>
+<option value="9">Clasa 9</option>
+<option value="10">Clasa 10</option>
+<option value="11">Clasa 11</option>
+<option value="12">Clasa 12</option>
+</select>
+<button class="blue" onclick="loadTemplate()">Load</button>
+</div><div class="card">
+<button class="danger" onclick="resetAll()">Reset</button>
 </div>
-</div>
-
-</div>
-
-<div class="modal-bg" id="modalBg">
+</div></div><div class="modal-bg" id="modalBg">
 <div class="modal">
-<p id="modalText">Confirm?</p>
-<div class="input-row">
-<button class="btn btn-primary" onclick="confirmAction()">OK</button>
-<button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+<p id="modalText"></p>
+<input id="modalInput" style="display:none">
+<button class="primary" onclick="confirmAction()">OK</button>
+<button onclick="closeModal()">Cancel</button>
 </div>
-</div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<div class="bottom">
-<button class="active" onclick="switchTab('subjects',this)">Subjects</button>
-<button onclick="switchTab('stats',this)">Stats</button>
-<button onclick="switchTab('settings',this)">Settings</button>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-let data = JSON.parse(localStorage.getItem('data')||'{}');
-let action = null;
+</div><div class="toast" id="toast"></div><div class="tabs">
+<button class="active" onclick="tab('home',this)">Subjects</button>
+<button onclick="tab('statsPage',this)">Stats</button>
+<button onclick="tab('settingsPage',this)">Settings</button>
+</div><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script>
+let data=JSON.parse(localStorage.getItem('data')||'{}');
+let action=null;
 let chart;
+let startX=0;
+
+const templates={
+6:["Biologia","Fizica","Matematica","Romana","Engleza"],
+7:["Biologia","Fizica","Matematica","Romana","Engleza","Chimia","Informatica"],
+8:["Biologia","Fizica","Matematica","Romana","Engleza","Chimia","Informatica"],
+9:["Biologia","Fizica","Matematica","Romana","Engleza","Chimia","Informatica"],
+10:["Biologia","Fizica","Matematica","Romana","Engleza","Chimia","Informatica"],
+11:["Biologia","Fizica","Matematica","Romana","Engleza","Chimia","Informatica"],
+12:["Biologia","Fizica","Matematica","Romana","Engleza","Chimia","Informatica"]
+};
 
 function save(){localStorage.setItem('data',JSON.stringify(data));}
+
 function toast(m){
-  const t=document.getElementById('toast');
-  t.innerText=m;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),1500);
-}
-function openModal(t,fn){
-  document.getElementById('modalText').innerText=t;
-  document.getElementById('modalBg').style.display='flex';
-  action=fn;
-}
-function closeModal(){document.getElementById('modalBg').style.display='none';}
-function confirmAction(){if(action) action(); closeModal();}
-
-function addSubject(){
-  const s=subject.value.trim();
-  if(!s) return toast('Completează');
-  if(data[s]) return toast('Există');
-  data[s]=[];
-  subject.value='';
-  save(); render();
+let t=document.getElementById('toast');
+t.innerText=m;
+t.classList.add('show');
+setTimeout(()=>t.classList.remove('show'),1200);
 }
 
-function addGrade(){
-  const s=subjectSelect.value;
-  const g=Number(grade.value);
-  if(!s||!g) return toast('Completează');
-  data[s].push(g);
-  grade.value='';
-  save(); render();
+function openModal(t,fn,inp=false,val=''){
+document.getElementById('modalText').innerText=t;
+let i=document.getElementById('modalInput');
+i.style.display=inp?'block':'none';
+i.value=val;
+document.getElementById('modalBg').style.display='flex';
+action=fn;
 }
 
-function deleteSubject(s){
-  openModal('Ștergi materia?',()=>{
-    delete data[s];
-    save(); render();
-  });
-}
+function closeModal(){document.getElementById('modalBg').style.display='none'}
+function confirmAction(){if(action)action(document.getElementById('modalInput').value);closeModal()}
 
-function deleteGrade(s,i){
-  openModal('Ștergi nota?',()=>{
-    data[s].splice(i,1);
-    save(); render();
-  });
-}
+function addSubject(){let s=subject.value.trim();if(!s)return;if(data[s])return;data[s]=[];subject.value='';save();render()}
+function addGrade(){let s=subjectSelect.value;let g=+grade.value;if(!s||!g)return;data[s].push(g);grade.value='';save();render()}
 
-function clearAll(){
-  openModal('Ștergi tot?',()=>{
-    data={};
-    save(); render();
-  });
-}
+function deleteSubject(s){openModal('Delete?',()=>{delete data[s];save();render()})}
+function deleteGrade(s,i){openModal('Delete?',()=>{data[s].splice(i,1);save();render()})}
 
-function avg(a){
-  return a.length?(a.reduce((x,y)=>x+y,0)/a.length).toFixed(2):0;
-}
+function avg(a){return a.length?(a.reduce((x,y)=>x+y)/a.length).toFixed(2):0}
 
 function render(){
-  subjectSelect.innerHTML='';
-  Object.keys(data).forEach(s=>{
-    subjectSelect.innerHTML+=`<option>${s}</option>`;
-  });
+subjectSelect.innerHTML='';
+Object.keys(data).forEach(s=>subjectSelect.innerHTML+=`<option>${s}</option>`);
 
-  list.innerHTML='';
-  Object.keys(data).forEach(sub=>{
-    list.innerHTML+=`
-    <div class="card">
-      <div class="row">
-        <b>${sub}</b>
-        <button class="btn btn-danger btn-icon" onclick="deleteSubject('${sub}')">🗑</button>
-      </div>
-      <div>Avg: ${avg(data[sub])}</div>
-      ${data[sub].map((g,i)=>`
-        <div class="grade"
-          ontouchstart="startSwipe(event,this)"
-          ontouchend="endSwipe(event,this,'${sub}',${i})"
-          onmousedown="holdStart(event,'${sub}',${i})">
-          <div>${g}</div>
-          <button class="btn btn-danger btn-icon" onclick="deleteGrade('${sub}',${i})">✕</button>
-          <div class="swipe">Delete</div>
-        </div>
-      `).join('')}
-    </div>
-    `;
-  });
+list.innerHTML='';
+Object.keys(data).forEach(s=>{
+list.innerHTML+=`<div class='card'>
+<div class='row'><b>${s}</b><button class='danger' onclick="deleteSubject('${s}')">X</button></div>
+${data[s].map((g,i)=>`
+<div class='grade'
+onmousedown="start(event)"
+onmouseup="end(event,'${s}',${i})"
+ontouchstart="startTouch(event)"
+ontouchend="endTouch(event,'${s}',${i})">
+<div>${g}</div><button class='danger' onclick="deleteGrade('${s}',${i})">X</button>
+<div class='swipe-bg'>DELETE</div>
+</div>`).join('')}
+</div>`});
 
-  renderChart();
+renderChart();
+renderStats();
 }
 
-let startX=0;
-function startSwipe(e){startX=e.touches[0].clientX;}
-function endSwipe(e,el,s,i){
-  let dx=e.changedTouches[0].clientX-startX;
-  if(dx<-60){
-    el.classList.add('swiped');
-    setTimeout(()=>deleteGrade(s,i),300);
-  }
+function start(e){startX=e.clientX}
+function end(e,s,i){if(e.clientX-startX<-80){data[s].splice(i,1);save();render()}}
+function startTouch(e){startX=e.touches[0].clientX}
+function endTouch(e,s,i){if(e.changedTouches[0].clientX-startX<-80){data[s].splice(i,1);save();render()}}
+
+function tab(id,btn){
+document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+btn.classList.add('active');
+home.style.display='none';statsPage.style.display='none';settingsPage.style.display='none';
+document.getElementById(id).style.display='block';
 }
 
-let holdTimer;
-function holdStart(e,s,i){
-  holdTimer=setTimeout(()=>{
-    let val=prompt('Edit grade',data[s][i]);
-    if(val!==null){
-      data[s][i]=Number(val);
-      save(); render();
-    }
-  },600);
+function loadTemplate(){
+let c=classSelect.value;
+templates[c].forEach(s=>{if(!data[s])data[s]=[]});
+save();render();toast('Loaded')
 }
-document.addEventListener('mouseup',()=>clearTimeout(holdTimer));
 
-function switchTab(t,btn){
-  document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
+function resetAll(){openModal('Reset?',()=>{data={};save();render()})}
 
-  document.getElementById('view-subjects').style.display = t==='subjects'?'block':'none';
-  document.getElementById('view-stats').style.display = t==='stats'?'block':'none';
-  document.getElementById('view-settings').style.display = t==='settings'?'block':'none';
+function renderStats(){
+let best=null,worst=null;
+Object.keys(data).forEach(s=>{
+let a=+avg(data[s]);
+if(!best||a>best.v)best={s,v:a};
+if(!worst||a<worst.v)worst={s,v:a};
+});
+stats.innerHTML=`
+<div class='stat big'>Best: ${best?best.s:'-'}</div>
+<div class='stat'>Worst: ${worst?worst.s:'-'}</div>
+<div class='stat'>Subjects: ${Object.keys(data).length}</div>
+`;
 }
 
 function renderChart(){
-  const labels=Object.keys(data);
-  const values=labels.map(s=>Number(avg(data[s])));
-  if(chart) chart.destroy();
-
-  chart=new Chart(document.getElementById('chart'),{
-    type:'bar',
-    data:{labels,datasets:[{data:values}]},
-    options:{plugins:{legend:{display:false}}}
-  });
+const labels=Object.keys(data);
+const values=labels.map(s=>+avg(data[s]));
+if(chart)chart.destroy();
+chart=new Chart(chartCtx,{type:'bar',data:{labels,datasets:[{data:values}]},options:{plugins:{legend:{display:false}}}});
 }
 
-render();
-</script>
+let chartCtx=document.getElementById('chart');
 
-</body>
+render();
+</script></body>
 </html>
